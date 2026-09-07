@@ -838,7 +838,7 @@
    ===================================================================== */
 /* ---- APP_META: แหล่งความจริงเดียวของเวอร์ชัน (ดูได้จาก console / คลิกชื่อแอป) ---- */
 const APP_META={
-  name:"StarNexus Cabinet", version:"1.170", build:"2026-09-01/partscan-p",
+  name:"StarNexus Cabinet", version:"1.171", build:"2026-09-02/matcache",
   file:"StarNexus.html", basedOn:"Furnitech_V3.html (v3.11)",
   /* ───────── เริ่มนับเวอร์ชันใหม่ที่ 1.001 (21/08/2026) ─────────
      ของเดิมนับมาถึง 42.1 แล้ววิ่งเป็นทศนิยมสองชั้นซึ่งอ่านลำดับยาก
@@ -846,6 +846,7 @@ const APP_META={
      ประวัติเก่าเก็บไว้ทั้งหมดตามเลขเดิม ไม่ไล่เขียนใหม่ เพราะเลขในนั้นถูกอ้างถึงไปแล้ว
      รายการที่อยู่ใต้ 1.001 ลงไปจึงเป็นเลขชุดเก่า อ่านต่อกันได้ตามวันที่ */
   changelog:[
+    ["1.171","2026-09-02","PERF แคช material ของรูตัน/รูขอบ/Pocket — สามจุดนี้สร้าง MeshStandardMaterial ใหม่ทุกจุดที่วาด ทั้งที่สีขึ้นกับ toneOf(b) ของแผ่นล้วน ๆ ไม่มีอะไรผูกกับตัวรู · ออร์เดอร์จริง 3 ตู้ 141 แผ่น สร้างทิ้ง 504 ตัวทุกครั้งที่ rebuild (รูขอบ+รูตัน 288 + Pocket 216) ที่ 70 ตู้จะเป็นราว 11,760 ตัว · ระบบแคช _matC มีอยู่แล้วตั้งแต่ solidMat/glassMat แค่สองฟังก์ชันนี้ไม่ได้ใช้ จึงเพิ่ม markMat(ti,kind) ที่ใช้ _matC ตัวเดียวกัน แยกคีย์ตาม โทน x ชนิด(edge/blind/drill/pocket) x ghost เหลือไม่กี่ตัวต่อโทน · ค่าสี roughness opacity side ทุกตัวยกมาตรงจากของเดิม ภาพที่เรนเดอร์ต้องเหมือนเดิมทุกพิกเซล · ตรวจแล้วว่าไม่มีโค้ดไหนแก้ .material ของ mesh กลุ่มนี้รายตัวภายหลัง (มี 4 จุดในไฟล์ เป็น floor grid measurement axis ทั้งหมด) แชร์ได้ปลอดภัย · หมายเหตุ: แก้นี้ลดเวลา rebuild กับหน่วยความจำ ไม่ได้ลด draw call ต่อเฟรม ตัวที่จะลด draw call คือ InstancedMesh ซึ่งยังไม่ได้ทำในรุ่นนี้"],
     ["1.170","2026-09-01","FEAT+FIX เปิดลิงก์ดูงานมาที่ชิ้นเดียวได้ด้วย ?view=<id>&p=<คีย์ชิ้น> ขั้นแรกของงานสแกน DataMatrix บนแผ่นไม้ · คีย์ชิ้นคือ รหัสตู้ ขีดล่าง ชื่อชิ้น เช่น WNT044_RightPanel ไม่ได้ใช้ id ของชิ้นตามที่ออกแบบไว้ตอนแรก เพราะ openSharedIfAny() แจก id ใหม่ให้ทุกชิ้นตอนโหลด (const nid=uid()) ของที่พิมพ์ลงสติกเกอร์แล้วต้องรอดจากการโหลดใหม่ ซึ่ง cab บวก name รอด ส่วน id ตายตั้งแต่วินาทีแรก · เทียบแบบตัดทุกอักขระที่ไม่ใช่ A-Z0-9 ออกทั้งสองฝั่ง เว้นวรรค ขีด ขีดล่าง ตัวพิมพ์เล็กใหญ่ จึงไม่มีผล และรับเลขใบต่อท้ายรหัสตู้ได้ด้วย WNT044-01_RightPanel เผื่อออเดอร์มีตู้รหัสเดียวกันหลายใบ ถ้าไม่ระบุใบจะได้ใบแรกพร้อมบอกว่าเข้าคีย์นี้กี่ใบ · ซ่อนตู้ใบอื่นด้วย state.hidden ตัวเดียวกับปุ่ม Isolate ใช้อยู่ ไม่ได้เขียนกลไกซ่อนใหม่ · แถบบนจอบอก รหัสตู้ ชื่อชิ้น ขนาด พร้อมปุ่ม ดูทั้งออเดอร์ เพื่อเลิกโฟกัส · FIX เปิดลิงก์แชร์แล้วขึ้น เปิดลิงก์ไม่สำเร็จ fitAll is not defined ทุกครั้ง — บรรทัดท้ายของ openSharedIfAny เรียก fitAll ซึ่งไม่มีฟังก์ชันชื่อนั้นอยู่ในไฟล์เลยสักตัว โยน ReferenceError แล้วถูก catch กลืนไว้ ฉากขึ้นได้เพราะ sync(1) ทำงานจบไปก่อนแล้ว แต่ applyLockUI กับข้อความบอกว่าเปิดสำเร็จไม่เคยได้ทำงาน · sync(1) เรียก render3D(true) ซึ่งจัดกล้องด้วย fitView ให้อยู่แล้ว บรรทัดนั้นจึงไม่จำเป็นตั้งแต่แรก เอาออก"],
     ["1.169","2026-09-01","CHORE ลดขนาดไฟล์ลง ~22% โดยไม่แตะโค้ดที่ทำงาน — ไฟล์โตขึ้นจนแก้ทีนึงต้องเลื่อนผ่านประวัติรุ่นเป็นพันบรรทัด และ 27% ของไฟล์เป็นบันทึกรุ่นล้วน ๆ ไม่ใช่โค้ด · (1) ย้ายประวัติสาย 2.x-42.x ทั้ง 699 รายการ ออกไปไฟล์ CHANGELOG-legacy.md ที่วางข้าง ๆ กัน ประวัติไม่หายสักบรรทัด แค่ไม่ต้องโหลดมากับหน้าเว็บ · showAppVersion() ยังทำงานเหมือนเดิม แสดงสาย 1.x ครบ 176 รายการ · (2) บล็อก manifest หัวไฟล์เก็บ CHANGELOG v2.11-v7.28 ไว้อีกชุดซ้ำกับที่อยู่ใน APP_META อยู่แล้ว 906 บรรทัด ตัดออกเหลือบรรทัดชี้ทาง · (3) ลบฟังก์ชันตาย 5 ตัว ยืนยันด้วยการ parse AST ทั้งไฟล์แล้วว่าไม่มีจุดเรียก: dedupeHoles ตัวบน (โค้ดตายที่คอมเมนต์ v37.8 ยอมรับไว้เอง และใช้ความละเอียดหยาบกว่าตัวจริง 0.25 มม. เทียบกับ 0.1 มม. ถ้าวันไหนสลับลำดับโค้ดจะได้ตัวผิด) · polyArea ตัวซ้ำ · groundHit ที่ถูก groundHitAt แทนตั้งแต่ v1.074 · varValue · woodTexture+texCache ที่เลิกใช้ตั้งแต่ v27.1 ยกไปใช้ทางของ Surface แทน · ไม่ลบ frameCutList แม้ AST บอกว่าไม่มีใครเรียก เพราะมันไม่ใช่โค้ดตาย แต่เป็นฟีเจอร์ BOM เส้นเฟรมของ v7.4 ที่ต่อสายไม่ครบ ลบทิ้งเท่ากับกลบบั๊ก"],
     ["1.168","2026-08-31","FEAT ปุ่มเปิด-ปิดเส้นตารางบนพื้น อยู่ในแถบล่างข้างปุ่มมุมมอง — รุ่นก่อนใส่สวิตช์ปิดตารางไว้แต่ต้องพิมพ์คำสั่งเอง ซึ่งไม่ใช่ทางที่คนใช้งานจริงจะไปหา ตอนนี้เป็นปุ่มกดชื่อว่าตาราง ไฟติดคือเปิดอยู่ กดแล้วเหลือพื้นเปล่า กดอีกทีกลับมา · สวิตช์เดิมยังใช้ได้เหมือนเดิม ทั้งสองทางคุมตัวเดียวกัน · ปุ่มนี้ใช้ได้ในโหมดดูอย่างเดียวด้วย เพราะเป็นเรื่องการมองล้วน ๆ ไม่ได้แก้อะไรในงาน · ตอนปิด กริดถูกถอดออกจากฉากพร้อมคืนหน่วยความจำจริง ไม่ใช่แค่ซ่อน และเปิดใหม่ก็สร้างชุดเดียว ไม่สะสม · ย้ำอีกครั้งว่าปิดตารางแทบไม่ได้ทำให้เร็วขึ้น ตัวเส้นเป็นวัตถุชิ้นเดียวเจ็ดร้อยกว่าจุด ที่กินแรงจริงคือแผ่นไม้หลายร้อยชิ้นที่เป็นวัตถุแยกกัน ปุ่มนี้มีไว้เลือกภาพที่อยากเห็น ไม่ใช่เพื่อความเร็ว"],
@@ -2348,6 +2349,29 @@ function glassMat(dbl){
   const m=new THREE.MeshStandardMaterial({color:new THREE.Color(0x9fc7d8),roughness:.08,metalness:0,transparent:true,opacity:state.ghost?.18:.34,depthWrite:false});
   if(dbl)m.side=THREE.DoubleSide;
   return (_matC[k]=m); }
+/* v1.171: material ของรูตัน/รูขอบ/Pocket เคยสร้างใหม่ทุกจุด ทั้งที่สีขึ้นกับโทนของแผ่นล้วน ๆ
+   ออร์เดอร์จริง 3 ตู้ 141 แผ่น สร้างทิ้ง 504 ตัวทุก rebuild · ที่ 70 ตู้จะเป็นราว 11,760 ตัว
+   ยกมาใช้ _matC ตัวเดียวกับที่ solidMat/glassMat ใช้อยู่แล้ว เหลือไม่กี่ตัวต่อโทน
+   ค่าสี roughness opacity side ทุกตัวคัดลอกตรงจากของเดิม ภาพที่เห็นต้องเท่าเดิมทุกพิกเซล */
+function markMat(ti,kind){
+  const k="mk|"+ti+"|"+kind+"|"+(state.ghost?1:0);
+  if(_matC[k]) return _matC[k];
+  let m;
+  if(kind==="drill"){                                   // จุดเจาะ วาดทับสุด — สีคงที่ ไม่ผูกกับโทนไม้
+    m=new THREE.MeshBasicMaterial({color:0x1f1f1f});
+    m.transparent=true; m.opacity=1; m.depthTest=false; m.depthWrite=false;
+    return (_matC[k]=m);
+  }
+  const base=new THREE.Color(TONES[ti].base);
+  if(kind==="pocket"){
+    m=new THREE.MeshStandardMaterial({color:base.multiplyScalar(.28),roughness:.95,metalness:0,side:THREE.DoubleSide});
+    if(state.ghost){m.transparent=true;m.opacity=.4;m.depthWrite=false;}
+  }else{                                                // "edge" = รูขอบ (roughness .95) · "blind" = รูตัน (.9)
+    m=new THREE.MeshStandardMaterial({color:base.multiplyScalar(.3),roughness:(kind==="edge"?.95:.9),metalness:0});
+    if(state.ghost){m.transparent=true;m.opacity=.35;m.depthWrite=false;}
+  }
+  return (_matC[k]=m);
+}
 function addEdges(mesh,geo){
   /* v13.7: ถ้าชิ้นเตรียมเส้นขอบมาเองแล้ว (แผ่นที่เซาะร่อง — ตัดรอยต่อชั้นออกแล้ว) ใช้ตัวนั้น */
   const pre=geo&&geo.userData&&geo.userData.edges;
@@ -2536,7 +2560,7 @@ function buildGrainMesh(b){
   const ls=new THREE.LineSegments(g,m); ls.renderOrder=3; return ls;
 }
 function buildBlindHoleMeshes(b){
-  const arr=[]; const T=Math.max(b.T||18,0.2); const M=orientMatrix(b.orient,b.yaw); const bp=new THREE.Vector3(b.x,b.y,b.z); const tone=TONES[toneOf(b)];
+  const arr=[]; const T=Math.max(b.T||18,0.2); const M=orientMatrix(b.orient,b.yaw); const bp=new THREE.Vector3(b.x,b.y,b.z); const _ti=toneOf(b); const tone=TONES[_ti];
   (b.holes||[]).forEach(h=>{
     if(h.edge){                                                   // horizontal edge hole → marker disc on the edge face
       const r=Math.max((h.d||8)/2,0.5), L=b.L,W=b.W, cz=Math.max(-T/2,Math.min(T/2,h.z||0)), along=h.pos||0;
@@ -2547,8 +2571,7 @@ function buildBlindHoleMeshes(b){
       else { cy=W/2+0.4; cx=along; axisX=false; }                 // back
       const g=new THREE.CylinderGeometry(r,r,0.8,16); if(axisX)g.rotateZ(Math.PI/2);
       g.translate(cx,cy,cz); g.applyMatrix4(M);
-      const mat=new THREE.MeshStandardMaterial({color:new THREE.Color(tone.base).multiplyScalar(.3),roughness:.95,metalness:0});
-      if(state.ghost){mat.transparent=true;mat.opacity=.35;mat.depthWrite=false;}
+      const mat=markMat(_ti,"edge");   // v1.171: แคชแทนสร้างใหม่ทุกรู
       const mesh=new THREE.Mesh(g,mat); mesh.position.copy(bp); mesh.userData.id=b.id; mesh.renderOrder=2; mesh.raycast=function(){}; arr.push(mesh);
       return;
     }
@@ -2560,8 +2583,8 @@ function buildBlindHoleMeshes(b){
     else { g=new THREE.CylinderGeometry(r,r,0.8,16); g.rotateX(Math.PI/2); }
     g.translate(h.x||0,h.y||0,cz); g.applyMatrix4(M);
     let mat;
-    if(isDrill){ mat=new THREE.MeshBasicMaterial({color:0x1f1f1f}); mat.transparent=true; mat.opacity=1; mat.depthTest=false; mat.depthWrite=false; }   // จุดเจาะ วาดทับสุด (transparent + renderOrder สูง + depthTest off) → เห็นทะลุกล่อง Alto/บานทุกมุม
-    else { mat=new THREE.MeshStandardMaterial({color:new THREE.Color(tone.base).multiplyScalar(.3),roughness:.9,metalness:0}); if(state.ghost){mat.transparent=true;mat.opacity=.35;mat.depthWrite=false;} }
+    if(isDrill){ mat=markMat(_ti,"drill"); }   // จุดเจาะ วาดทับสุด (transparent + renderOrder สูง + depthTest off) → เห็นทะลุกล่อง Alto/บานทุกมุม
+    else { mat=markMat(_ti,"blind"); }         // v1.171: แคชแทนสร้างใหม่ทุกรู
     const mesh=new THREE.Mesh(g,mat); mesh.position.copy(bp); mesh.userData.id=b.id; mesh.renderOrder=isDrill?999:3; mesh.raycast=function(){}; mesh.frustumCulled=false; arr.push(mesh);
   });
   return arr;
@@ -2977,13 +3000,12 @@ function buildBoardMeshRaw(b){
   return {geo:new THREE.BoxGeometry(sd(d[0]),sd(d[1]),sd(d[2])), mats:b._glass?glassMat():boardMat(b), d:[sd(d[0]),sd(d[1]),sd(d[2])]};
 }
 function buildPocketMeshes(b){   // Pocket = สี่เหลี่ยมเข้มฝังผิว (บากหูแขวน _notch ข้าม — profile โชว์แล้ว)
-  const arr=[]; const T=Math.max(b.T||18,0.2); const M=orientMatrix(b.orient,b.yaw); const bp=new THREE.Vector3(b.x,b.y,b.z); const tone=TONES[toneOf(b)];
+  const arr=[]; const T=Math.max(b.T||18,0.2); const M=orientMatrix(b.orient,b.yaw); const bp=new THREE.Vector3(b.x,b.y,b.z); const _ti=toneOf(b); const tone=TONES[_ti];
   if(b._pkGeo) return arr;                                          // v7.80: เจาะเป็นเนื้อไม้จริงแล้ว (ทาบทับจะบังปากหลุม)
   (b.pockets||[]).forEach(pk=>{ if(pk._notch)return;
     const w=Math.max(pk.w||10,.5), h=Math.max(pk.h||10,.5), eps=0.06, onBottom=(pk.face==="bottom");
     const g=new THREE.PlaneGeometry(w,h); g.translate(pk.x||0,pk.y||0,(onBottom?-(T/2+eps):(T/2+eps))); g.applyMatrix4(M);
-    const mat=new THREE.MeshStandardMaterial({color:new THREE.Color(tone.base).multiplyScalar(.28),roughness:.95,metalness:0,side:THREE.DoubleSide});
-    if(state.ghost){mat.transparent=true;mat.opacity=.4;mat.depthWrite=false;}
+    const mat=markMat(_ti,"pocket");   // v1.171: แคชแทนสร้างใหม่ทุก Pocket
     const mesh=new THREE.Mesh(g,mat); mesh.position.copy(bp); mesh.userData.id=b.id; mesh.renderOrder=2; mesh.raycast=function(){}; arr.push(mesh);
   });
   return arr;
